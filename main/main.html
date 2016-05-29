@@ -1,0 +1,40 @@
+<div layout="column" layout-fill>
+    <md-toolbar>
+        <div class="md-toolbar-tools">
+            <span>Treller</span>
+            <!-- fill up the space between left and right area -->
+            <span flex></span>
+            <md-button ng-click="$ctrl.authenticate()" ng-hide="$ctrl.authorized">
+                AUTHORIZE
+            </md-button>
+        </div>
+    </md-toolbar>
+    <md-content class="md-padding">
+        <div layout="column" flex="60">
+            <md-card ng-repeat="board in $ctrl.boards" layout="column" ng-show="$ctrl.comments[board.id]">
+                <md-card-title layout="row">
+                    <md-card-title-text>
+                        <span class="md-headline">{{ board.name }}</span>
+                        <span class="md-subhead">{{ board.organization.displayName }}</span>
+                    </md-card-title-text>
+                </md-card-title>
+                <md-card-content layout="row">
+                    <md-list>
+                        <md-list-item class="md-3-line" ng-repeat="comment in $ctrl.comments[board.id]">
+                            <md-checkbox ng-model="comment._checked" ng-change="$ctrl.markCkecked(comment)"></md-checkbox>
+                            <div class="md-list-item-text">
+                                <h3>{{ comment.data.card.name }}</h3>
+                                <h4>{{ comment.data.list.name }}</h4>
+                                <p>{{ comment.data.text }} ( {{ comment.date | date }} )</p>
+                            </div>
+                        </md-list-item>
+                    </md-list>
+                </md-card-content>
+            </md-card>
+
+        </div>
+        <div layout="column" flex="40">
+
+        </div>
+    </md-content>
+</div>
