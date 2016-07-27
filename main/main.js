@@ -36,52 +36,51 @@
             $ctrl.authorized = true;
             $ctrl.error = '';
 
-            getMyBoards();
+            getMyComments();
         }
 
         function onAuthorizeFail() {
             $ctrl.error = 'Ошибка авторизации';
         }
 
-        function getMyBoards() {
+        function getMyComments() {
             trelloApiClient.raw
-                .get('/members/me/boards?organization=true&filter=open&actions=commentCard')
+                .get('/members/me/actions?filter=open&filter=commentCard&limit=1000')
                 .then(function (response) {
                     $scope.$apply(function () {
-                        var boards = _(response)
-                            .orderBy('dateLastView', 'desc')
+                        var comments = _(response)
+                            .orderBy('date', 'desc')
                             .value();
 
-                        $ctrl.boards = boards;
-                        parseComments();
+                        parseComments(comments);
                     })
                 });
         }
 
-        function parseComments() {
-            trelloApiClient.raw
-                .get('/members/me/actions?entities=true&filter=commentCard&memberCreator=false&limit=1000')
-                .then(function (response) {
-                    $scope.$apply(function () {
-                        if (response.length === 1000) {
-                            openToast('1000 actions reached!');
-                        }
-                        $ctrl.comments = _(response)
-                            .filter(function (value) {
-                                initComment(value);
-                                return value._timed;
-                            })
-                            .orderBy('date', 'desc')
-                            .groupBy('data.board.id')
-                            .value();
+        function parseComments(inComments) {
+            if (inComments.length === 1000) {
+                openToast('1000 actions reached!');
+            }
+            $ctrl.months = _(inComments)
+                .filter(function (value) {
+                    initComment(value);
+                    return value._timed;
+                })
+                // Если данные по карточке неактуальны
+                // .map(function (inComment) {
+                //     return fetchCard(inComment);
+                // })
+                .orderBy('date', 'desc')
+                .groupBy(function (inComment) {
+                    return inComment.date.match(/\d\d\d\d-\d\d/)[0];
+                })
+                .value();
 
-                        _.each($ctrl.comments, function (comments) {
-                            _.each(comments, function (comment) {
-                                fetchCard(comment);
-                            });
-                        });
-                    })
-                });
+            $ctrl.summary = _.mapValues($ctrl.months, function (inComments) {
+                return _.reduce(inComments, function(sum, comment) {
+                    return sum + comment._hours;
+                }, 0);
+            });
         }
 
 
@@ -89,6 +88,14 @@
             var text = _.trim(inComment.data.text);
             inComment._checked = _.endsWith(text, CHECK_MARK);
             inComment._timed = _.startsWith(text, '~');
+
+            if (inComment._timed) {
+                var match = text.match(/~(?:(\d+)h)?\s*(?:(\d+)m)?/i);
+                var hours = Number(match[1]) || 0;
+                var minutes = Number(match[2]) || 0;
+
+                inComment._hours = hours + minutes / 60;
+            }
         }
 
         function fetchCard(inComment) {
@@ -103,6 +110,8 @@
                         _.assign(list, response.list);
                     })
                 });
+
+            return inComment;
         }
 
         function markCkecked(inComment) {
