@@ -15,7 +15,8 @@
                 <md-card-title layout="row">
                     <md-card-title-text>
                         <span class="md-headline">{{ month }}</span>
-                        <span class="md-subhead">Суммарно {{ $ctrl.summary[month].checked | number:2 }}/{{ $ctrl.summary[month].total | number:2 }} ч.</span>
+                        <span class="md-subhead">Суммарно {{ $ctrl.summary[month].checked | number:2 }}/{{ $ctrl.summary[month].total | number:2 }} ч. 
+                            Остаток {{ $ctrl.summary[month].total - $ctrl.summary[month].checked | number:2 }}</span>
                     </md-card-title-text>
                 </md-card-title>
                 <md-card-content layout="row">
