@@ -16,20 +16,45 @@
         $ctrl.title = 'MainController';
 
         $ctrl.authorized = false;
+        $ctrl.rate = 0;
         $ctrl.boards = [];
         $ctrl.comments = {};
         $ctrl.lists = {};
 
         $ctrl.markCkecked = markCkecked;
+        $ctrl.setRate = setRate;
 
         activate();
 
         ////////////////
 
         function activate() {
+            initRate()
             trelloApiClient
                 .authorize()
                 .then(onAuthorized, onAuthorizeFail);
+        }
+
+        function initRate() {
+            var rate = window.localStorage.getItem('rate');
+
+            if (rate === null) {
+                setRate()
+            } else {
+                $ctrl.rate = rate;
+            }
+        }
+
+        function setRate() {
+            var rate;
+
+            do {
+                var inputRate = prompt('Введите рейт в час. (nолько число)', 0);
+                rate = +inputRate;
+            } while (isNaN(rate));
+
+            window.localStorage.setItem('rate', rate);
+            $ctrl.rate = rate;
         }
 
         function onAuthorized() {
@@ -83,11 +108,15 @@
             $ctrl.summary = _.mapValues($ctrl.months, function (inComments) {
                 return _.reduce(inComments, function(result, comment) {
                     result.total += comment._hours;
+                    
                     if (comment._checked) {
                         result.checked += comment._hours;
+                    } else {
+                        result.unchecked += comment._hours;
                     }
+
                     return result;
-                }, {total: 0, checked: 0});
+                }, {total: 0, checked: 0, unchecked: 0});
             });
         }
 
