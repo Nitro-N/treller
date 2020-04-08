@@ -15,7 +15,7 @@
                 <md-card-title layout="row">
                     <md-card-title-text>
                         <span class="md-headline">{{ month }}</span>
-                        <span class="md-subhead">Суммарно {{ $ctrl.summary[month] }} ч.</span>
+                        <span class="md-subhead">Суммарно {{ $ctrl.summary[month].checked | number:2 }}/{{ $ctrl.summary[month].total | number:2 }} ч.</span>
                     </md-card-title-text>
                 </md-card-title>
                 <md-card-content layout="row">
@@ -25,7 +25,7 @@
                             <div class="md-list-item-text">
                                 <h3>{{ comment.data.card.name }}</h3>
                                 <h4>{{ comment.data.board.name }} <i>{{ comment.data.list.name }}</i></h4>
-                                <p>{{ comment.data.text }} => {{ comment._hours }}h  ( {{ comment.date | date }} )</p>
+                                <p>{{ comment.data.text }} => {{ comment._hours | number:2 }}h  ( {{ comment.date | date }} )</p>
                             </div>
                         </md-list-item>
                     </md-list>

@@ -76,13 +76,20 @@
                 })
                 .value();
 
-            $ctrl.summary = _.mapValues($ctrl.months, function (inComments) {
-                return _.reduce(inComments, function(sum, comment) {
-                    return sum + comment._hours;
-                }, 0);
-            });
+            calcSummary();
         }
 
+        function calcSummary() {
+            $ctrl.summary = _.mapValues($ctrl.months, function (inComments) {
+                return _.reduce(inComments, function(result, comment) {
+                    result.total += comment._hours;
+                    if (comment._checked) {
+                        result.checked += comment._hours;
+                    }
+                    return result;
+                }, {total: 0, checked: 0});
+            });
+        }
 
         function initComment(inComment) {
             var text = _.trim(inComment.data.text);
@@ -129,6 +136,7 @@
                     $scope.$apply(function () {
                         _.assign(inComment, response);
                         initComment(inComment);
+                        calcSummary();
                     })
                 });
         }
